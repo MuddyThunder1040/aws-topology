@@ -11,5 +11,5 @@ provider "local" {
 }
 resource "local_file" "example" {
   content  = "This is an example file created by Terraform.\n"
-filename = "${path.module}/aws-topology.txt"
+  filename = "${path.module}/aws-topology.txt"
 }
