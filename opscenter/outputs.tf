@@ -1,38 +1,43 @@
-output "cassandra_web_url" {
-  description = "Cassandra Web UI URL"
-  value       = "http://localhost:3000"
+output "opscenter_url" {
+  description = "OpsCenter Web UI URL"
+  value       = "http://localhost:8888"
 }
 
-output "cassandra_web_container_id" {
-  description = "Cassandra Web container ID"
-  value       = docker_container.cassandra_web.id
+output "opscenter_container_id" {
+  description = "OpsCenter container ID"
+  value       = docker_container.opscenter.id
 }
 
-output "cassandra_web_container_name" {
-  description = "Cassandra Web container name"
-  value       = docker_container.cassandra_web.name
+output "opscenter_container_name" {
+  description = "OpsCenter container name"
+  value       = docker_container.opscenter.name
 }
 
 output "connection_instructions" {
-  description = "Instructions to access Cassandra monitoring"
+  description = "Instructions to connect OpsCenter to Cassandra cluster"
   value       = <<-EOT
     
-    🔍 Cassandra Web Monitoring UI
+    🔍 DataStax OpsCenter Monitoring
     ================================
     
-    Web UI:     http://localhost:3000
+    Web UI:     http://localhost:8888
     
-    📊 Features:
-    - Browse keyspaces and tables
-    - Execute CQL queries
-    - View cluster information
-    - Monitor node status
-    - Table data explorer
+    📊 Setup Instructions:
+    1. Open http://localhost:8888 in your browser
+    2. Click "Manage Existing Cluster"
+    3. Enter cluster details:
+       - Host: cassandra-node1
+       - Port: 9042
+    4. OpsCenter will discover all 4 nodes
     
-    🔧 Alternative: Using cqlsh
-    docker exec -it cassandra-node1 cqlsh
+    📈 Monitoring Features:
+    - Real-time cluster metrics
+    - Node health status
+    - Query performance tracking
+    - Repair scheduling
+    - Backup management
     
-    📈 Check Cluster Status:
+    🔧 Alternative: Using nodetool
     docker exec cassandra-node1 nodetool status
     
   EOT
