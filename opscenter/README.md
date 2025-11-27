@@ -1,15 +1,14 @@
-# DataStax OpsCenter for Cassandra Monitoring
+# Cassandra Web - Monitoring UI
 
-DataStax OpsCenter provides comprehensive monitoring and management for your Cassandra cluster.
+Cassandra Web provides a simple web-based UI for monitoring and managing your Cassandra cluster.
 
 ## Features
 
-- **Real-time Monitoring**: Live cluster metrics and performance data
-- **Node Health**: Track the status of all Cassandra nodes
-- **Query Analysis**: Performance tracking and optimization
-- **Alerts**: Configurable alerts for cluster issues
-- **Repair Management**: Schedule and track repair operations
-- **Backup Management**: Configure and monitor backups
+- **Keyspace Browser**: Explore keyspaces and tables
+- **CQL Query Interface**: Execute queries directly from the browser
+- **Cluster Information**: View cluster topology and node details
+- **Data Explorer**: Browse table data with pagination
+- **Schema Viewer**: Inspect table schemas and indexes
 
 ## Deployment
 
@@ -17,7 +16,7 @@ DataStax OpsCenter provides comprehensive monitoring and management for your Cas
 - Cassandra cluster must be running (from `cassandra/` directory)
 - Docker daemon accessible
 
-### Deploy OpsCenter
+### Deploy Cassandra Web
 
 ```bash
 cd opscenter
@@ -28,56 +27,34 @@ terraform apply -auto-approve
 
 ### Access Web UI
 
-Open your browser to: **http://localhost:8888**
+Open your browser to: **http://localhost:3000**
 
-## Initial Setup
+The UI will automatically connect to `cassandra-node1:9042`.
 
-1. Navigate to http://localhost:8888
-2. Click **"Add a Cluster"** or **"Manage Existing Cluster"**
-3. Enter connection details:
-   - **Cluster Name**: `cassandra-cluster`
-   - **Host**: `cassandra-node1`
-   - **Port**: `9042`
-4. Click **"Save Cluster"**
+## Usage
 
-OpsCenter will automatically discover all 4 nodes in your cluster.
+### Browse Data
+1. Navigate to http://localhost:3000
+2. Select a keyspace from the dropdown
+3. Click on a table to view its data
+4. Use pagination controls to browse records
+
+### Execute Queries
+1. Go to the Query tab
+2. Enter your CQL query
+3. Click Execute
+4. View results in the table below
+
+### View Cluster Info
+- Check the Cluster tab for node information
+- View replication settings
+- Monitor keyspace configurations
 
 ## Port Mapping
 
-| Port  | Purpose                    |
-|-------|----------------------------|
-| 8888  | Web UI                     |
-| 61620 | Agent communication        |
-| 61621 | Stomp protocol for agents  |
-
-## Monitoring Capabilities
-
-### Dashboard Views
-- Cluster overview
-- Individual node metrics
-- Keyspace statistics
-- Table performance
-- Query latency tracking
-
-### Metrics Tracked
-- CPU usage
-- Memory utilization
-- Disk I/O
-- Network throughput
-- Read/Write latency
-- Compaction progress
-- GC activity
-
-## Management Operations
-
-From OpsCenter you can:
-- Run repairs
-- Take snapshots
-- Restore from backups
-- Add/remove nodes
-- Configure alerts
-- View logs
-- Execute CQL queries
+| Port | Purpose          |
+|------|------------------|
+| 3000 | Web UI           |
 
 ## Alternative Monitoring
 
@@ -89,8 +66,8 @@ docker exec cassandra-node1 nodetool status
 # View cluster info
 docker exec cassandra-node1 nodetool info
 
-# Check gossip
-docker exec cassandra-node1 nodetool gossipinfo
+# Check data distribution
+docker exec cassandra-node1 nodetool ring
 ```
 
 ### Using cqlsh
@@ -98,8 +75,16 @@ docker exec cassandra-node1 nodetool gossipinfo
 # Connect to cluster
 docker exec -it cassandra-node1 cqlsh
 
-# Check system tables
-SELECT * FROM system.peers;
+# List keyspaces
+DESCRIBE KEYSPACES;
+
+# Use a keyspace
+USE system;
+
+# Show tables
+DESCRIBE TABLES;
+
+# Query data
 SELECT * FROM system.local;
 ```
 
@@ -109,35 +94,54 @@ SELECT * FROM system.local;
 terraform destroy -auto-approve
 ```
 
-This will remove OpsCenter but preserve the Cassandra cluster.
-
-## Integration with CI/CD
-
-Use the OpsCenter Terraform operations pipeline to automate deployment:
-- Add OpsCenter to your infrastructure as code
-- Monitor cluster health in Jenkins
-- Automate alerting and reporting
+This will remove Cassandra Web but preserve the Cassandra cluster.
 
 ## Troubleshooting
 
-### OpsCenter Can't Connect
+### Can't Connect to Cassandra
 ```bash
 # Check if Cassandra nodes are up
 docker ps | grep cassandra
 
 # Verify network connectivity
-docker exec opscenter ping cassandra-node1
+docker exec cassandra-web ping cassandra-node1
 
-# Check OpsCenter logs
-docker logs opscenter
+# Check Cassandra Web logs
+docker logs cassandra-web
 ```
 
-### Performance Issues
-- Ensure adequate resources for Docker
-- Check node health: `docker exec cassandra-node1 nodetool status`
-- Review OpsCenter logs for errors
+### Web UI Not Loading
+```bash
+# Check if container is running
+docker ps | grep cassandra-web
+
+# Restart container
+docker restart cassandra-web
+
+# Check port binding
+docker port cassandra-web
+```
+
+## Features Overview
+
+### Keyspace Management
+- View all keyspaces
+- See replication strategies
+- Check durable writes settings
+
+### Table Operations
+- Browse table schemas
+- View column definitions
+- Check primary keys and indexes
+- Explore partition keys
+
+### Query Interface
+- Execute SELECT queries
+- Run INSERT/UPDATE/DELETE
+- View query results
+- Export data (copy from browser)
 
 ## Additional Resources
 
-- [OpsCenter Documentation](https://docs.datastax.com/en/opscenter/6.8/)
-- [Cassandra Monitoring Best Practices](https://cassandra.apache.org/doc/latest/operating/metrics.html)
+- [Cassandra Web GitHub](https://github.com/markusgulden/cassandra-web)
+- [CQL Reference](https://cassandra.apache.org/doc/latest/cql/)

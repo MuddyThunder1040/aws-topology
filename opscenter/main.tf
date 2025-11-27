@@ -16,15 +16,15 @@ data "docker_network" "cassandra_network" {
   name = "cassandra-network"
 }
 
-# OpsCenter image (community version)
-resource "docker_image" "opscenter" {
-  name = "thelastpickle/cassandra-opscenter:latest"
+# Cassandra Web UI for monitoring
+resource "docker_image" "cassandra_web" {
+  name = "markusgulden/cassandra-web:latest"
 }
 
-# OpsCenter container for monitoring Cassandra cluster
-resource "docker_container" "opscenter" {
-  name  = "opscenter"
-  image = docker_image.opscenter.image_id
+# Cassandra Web container for monitoring Cassandra cluster
+resource "docker_container" "cassandra_web" {
+  name  = "cassandra-web"
+  image = docker_image.cassandra_web.image_id
   
   networks_advanced {
     name = data.docker_network.cassandra_network.name
@@ -32,31 +32,26 @@ resource "docker_container" "opscenter" {
 
   # Web UI port
   ports {
-    internal = 8888
-    external = 8888
+    internal = 3000
+    external = 3000
   }
 
-  # Agent communication port
-  ports {
-    internal = 61620
-    external = 61620
-  }
-
-  # Stomp port for agents
-  ports {
-    internal = 61621
-    external = 61621
-  }
+  env = [
+    "CASSANDRA_HOST=cassandra-node1",
+    "CASSANDRA_PORT=9042",
+    "CASSANDRA_USERNAME=",
+    "CASSANDRA_PASSWORD="
+  ]
 
   volumes {
-    container_path = "/var/lib/opscenter"
-    volume_name    = docker_volume.opscenter_data.name
+    container_path = "/data"
+    volume_name    = docker_volume.cassandra_web_data.name
   }
 
   restart = "unless-stopped"
 }
 
-# Persistent storage for OpsCenter data
-resource "docker_volume" "opscenter_data" {
-  name = "opscenter-data"
+# Persistent storage for Cassandra Web data
+resource "docker_volume" "cassandra_web_data" {
+  name = "cassandra-web-data"
 }
