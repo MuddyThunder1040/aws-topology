@@ -8,9 +8,9 @@ output "opscenter_container_id" {
   value       = docker_container.opscenter.id
 }
 
-output "opscenter_status" {
-  description = "OpsCenter container status"
-  value       = docker_container.opscenter.status
+output "opscenter_container_name" {
+  description = "OpsCenter container name"
+  value       = docker_container.opscenter.name
 }
 
 output "connection_instructions" {
