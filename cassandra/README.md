@@ -1,6 +1,14 @@
-# Cassandra 4-Node Cluster with Terraform + Docker
+# Cassandra Multi-Node Cluster with Terraform + Docker
 
-This Terraform configuration deploys a 4-node Cassandra cluster using Docker on your local Ubuntu laptop.
+This Terraform configuration deploys a configurable multi-node Cassandra cluster using Docker on your local Ubuntu laptop.
+
+## Features
+
+- **Dynamic node count**: Create 1 to 10 Cassandra nodes
+- **Persistent storage**: Each node has its own Docker volume
+- **Automatic networking**: All nodes connected via Docker bridge network
+- **Seed node**: First node acts as the cluster seed
+- **Port mapping**: Sequential ports (9042, 9043, 9044, ...)
 
 ## Prerequisites
 
@@ -19,6 +27,22 @@ This Terraform configuration deploys a 4-node Cassandra cluster using Docker on 
    unzip terraform_1.6.0_linux_amd64.zip
    sudo mv terraform /usr/local/bin/
    ```
+
+## Configuration
+
+### Set Number of Nodes
+
+Edit `terraform.tfvars` to configure the cluster size:
+
+```hcl
+# Number of Cassandra nodes to create (1-10)
+node_count = 4
+```
+
+Or pass it as a variable during apply:
+```bash
+terraform apply -var="node_count=6"
+```
 
 ## Deployment
 
@@ -50,7 +74,7 @@ Check cluster status:
 docker exec -it cassandra-node1 nodetool status
 ```
 
-You should see all 4 nodes in UN (Up/Normal) state:
+You should see all nodes in UN (Up/Normal) state:
 ```
 Datacenter: dc1
 ===============
@@ -98,10 +122,44 @@ SELECT * FROM users;
 
 ## Cluster Ports
 
+The ports are dynamically assigned based on node count:
 - **Node 1**: localhost:9042
 - **Node 2**: localhost:9043
 - **Node 3**: localhost:9044
-- **Node 4**: localhost:9045
+- **Node N**: localhost:9042+(N-1)
+
+Check all ports with:
+```bash
+terraform output node_ports
+```
+
+## Scaling the Cluster
+
+### Increase Nodes
+
+1. Update `terraform.tfvars`:
+   ```hcl
+   node_count = 6  # Increase from 4 to 6
+   ```
+
+2. Apply changes:
+   ```bash
+   terraform apply
+   ```
+
+### Decrease Nodes
+
+⚠️ **Warning**: Reducing nodes will remove data. Back up first!
+
+1. Update `terraform.tfvars`:
+   ```hcl
+   node_count = 2  # Decrease from 4 to 2
+   ```
+
+2. Apply changes:
+   ```bash
+   terraform apply
+   ```
 
 ## Destroy Cluster
 
@@ -112,12 +170,11 @@ terraform destroy
 
 ## Troubleshooting
 
-**Check logs:**
+**Check logs for any node:**
 ```bash
 docker logs cassandra-node1
 docker logs cassandra-node2
-docker logs cassandra-node3
-docker logs cassandra-node4
+# ... etc
 ```
 
 **Check container status:**
@@ -128,6 +185,11 @@ docker ps -a | grep cassandra
 **Restart a node:**
 ```bash
 docker restart cassandra-node1
+```
+
+**Check which nodes are running:**
+```bash
+terraform output all_nodes
 ```
 
 **Access a node shell:**

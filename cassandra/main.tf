@@ -11,136 +11,22 @@ provider "docker" {
   host = "unix:///var/run/docker.sock"
 }
 
+# Variable for number of Cassandra nodes
+variable "node_count" {
+  description = "Number of Cassandra nodes to create"
+  type        = number
+  default     = 4
+  
+  validation {
+    condition     = var.node_count >= 1 && var.node_count <= 10
+    error_message = "Node count must be between 1 and 10."
+  }
+}
+
 # Create a network for Cassandra nodes
 resource "docker_network" "cassandra_network" {
   name = "cassandra-network"
   driver = "bridge"
-}
-
-# Cassandra Node 1 (Seed Node)
-resource "docker_container" "cassandra_node1" {
-  name  = "cassandra-node1"
-  image = docker_image.cassandra.image_id
-  
-  networks_advanced {
-    name = docker_network.cassandra_network.name
-  }
-
-  ports {
-    internal = 9042
-    external = 9042
-  }
-
-  env = [
-    "CASSANDRA_CLUSTER_NAME=cassandra-cluster",
-    "CASSANDRA_DC=dc1",
-    "CASSANDRA_RACK=rack1",
-    "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch",
-    "CASSANDRA_SEEDS=cassandra-node1"
-  ]
-
-  volumes {
-    container_path = "/var/lib/cassandra"
-    volume_name    = docker_volume.cassandra_data1.name
-  }
-
-  restart = "unless-stopped"
-}
-
-# Cassandra Node 2
-resource "docker_container" "cassandra_node2" {
-  name  = "cassandra-node2"
-  image = docker_image.cassandra.image_id
-  
-  networks_advanced {
-    name = docker_network.cassandra_network.name
-  }
-
-  ports {
-    internal = 9042
-    external = 9043
-  }
-
-  env = [
-    "CASSANDRA_CLUSTER_NAME=cassandra-cluster",
-    "CASSANDRA_DC=dc1",
-    "CASSANDRA_RACK=rack1",
-    "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch",
-    "CASSANDRA_SEEDS=cassandra-node1"
-  ]
-
-  volumes {
-    container_path = "/var/lib/cassandra"
-    volume_name    = docker_volume.cassandra_data2.name
-  }
-
-  restart = "unless-stopped"
-  
-  depends_on = [docker_container.cassandra_node1]
-}
-
-# Cassandra Node 3
-resource "docker_container" "cassandra_node3" {
-  name  = "cassandra-node3"
-  image = docker_image.cassandra.image_id
-  
-  networks_advanced {
-    name = docker_network.cassandra_network.name
-  }
-
-  ports {
-    internal = 9042
-    external = 9044
-  }
-
-  env = [
-    "CASSANDRA_CLUSTER_NAME=cassandra-cluster",
-    "CASSANDRA_DC=dc1",
-    "CASSANDRA_RACK=rack1",
-    "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch",
-    "CASSANDRA_SEEDS=cassandra-node1"
-  ]
-
-  volumes {
-    container_path = "/var/lib/cassandra"
-    volume_name    = docker_volume.cassandra_data3.name
-  }
-
-  restart = "unless-stopped"
-  
-  depends_on = [docker_container.cassandra_node1]
-}
-
-# Cassandra Node 4
-resource "docker_container" "cassandra_node4" {
-  name  = "cassandra-node4"
-  image = docker_image.cassandra.image_id
-  
-  networks_advanced {
-    name = docker_network.cassandra_network.name
-  }
-
-  ports {
-    internal = 9042
-    external = 9045
-  }
-
-  env = [
-    "CASSANDRA_CLUSTER_NAME=cassandra-cluster",
-    "CASSANDRA_DC=dc1",
-    "CASSANDRA_RACK=rack1",
-    "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch",
-    "CASSANDRA_SEEDS=cassandra-node1"
-  ]
-
-  volumes {
-    container_path = "/var/lib/cassandra"
-    volume_name    = docker_volume.cassandra_data4.name
-  }
-
-  restart = "unless-stopped"
-  
-  depends_on = [docker_container.cassandra_node1]
 }
 
 # Docker image
@@ -148,19 +34,42 @@ resource "docker_image" "cassandra" {
   name = "cassandra:latest"
 }
 
-# Volumes for persistent storage
-resource "docker_volume" "cassandra_data1" {
-  name = "cassandra-data1"
+# Volumes for persistent storage (dynamic based on node_count)
+resource "docker_volume" "cassandra_data" {
+  count = var.node_count
+  name  = "cassandra-data${count.index + 1}"
 }
 
-resource "docker_volume" "cassandra_data2" {
-  name = "cassandra-data2"
-}
+# Cassandra Nodes (dynamic based on node_count)
+resource "docker_container" "cassandra_node" {
+  count = var.node_count
+  name  = "cassandra-node${count.index + 1}"
+  image = docker_image.cassandra.image_id
+  
+  networks_advanced {
+    name = docker_network.cassandra_network.name
+  }
 
-resource "docker_volume" "cassandra_data3" {
-  name = "cassandra-data3"
-}
+  ports {
+    internal = 9042
+    external = 9042 + count.index
+  }
 
-resource "docker_volume" "cassandra_data4" {
-  name = "cassandra-data4"
+  env = [
+    "CASSANDRA_CLUSTER_NAME=cassandra-cluster",
+    "CASSANDRA_DC=dc1",
+    "CASSANDRA_RACK=rack1",
+    "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch",
+    "CASSANDRA_SEEDS=cassandra-node1"
+  ]
+
+  volumes {
+    container_path = "/var/lib/cassandra"
+    volume_name    = docker_volume.cassandra_data[count.index].name
+  }
+
+  restart = "unless-stopped"
+  
+  # All nodes except the first one depend on node1 (seed node)
+  depends_on = count.index > 0 ? [docker_container.cassandra_node[0]] : []
 }

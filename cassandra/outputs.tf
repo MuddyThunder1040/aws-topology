@@ -1,21 +1,14 @@
-output "cassandra_node1_port" {
-  description = "CQL port for Cassandra Node 1"
-  value       = 9042
+output "node_count" {
+  description = "Number of Cassandra nodes created"
+  value       = var.node_count
 }
 
-output "cassandra_node2_port" {
-  description = "CQL port for Cassandra Node 2"
-  value       = 9043
-}
-
-output "cassandra_node3_port" {
-  description = "CQL port for Cassandra Node 3"
-  value       = 9044
-}
-
-output "cassandra_node4_port" {
-  description = "CQL port for Cassandra Node 4"
-  value       = 9045
+output "node_ports" {
+  description = "CQL ports for all Cassandra nodes"
+  value = {
+    for i in range(var.node_count) :
+    "cassandra-node${i + 1}" => 9042 + i
+  }
 }
 
 output "connection_string" {
@@ -26,4 +19,9 @@ output "connection_string" {
 output "cluster_status" {
   description = "Command to check cluster status"
   value       = "docker exec -it cassandra-node1 nodetool status"
+}
+
+output "all_nodes" {
+  description = "List of all Cassandra node names"
+  value       = [for i in range(var.node_count) : "cassandra-node${i + 1}"]
 }
