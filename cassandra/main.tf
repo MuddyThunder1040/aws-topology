@@ -69,7 +69,4 @@ resource "docker_container" "cassandra_node" {
   }
 
   restart = "unless-stopped"
-  
-  # All nodes except the first one depend on node1 (seed node)
-  depends_on = count.index > 0 ? [docker_container.cassandra_node[0]] : []
 }
