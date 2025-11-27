@@ -26,6 +26,10 @@ resource "docker_container" "opscenter" {
   name  = "opscenter"
   image = docker_image.opscenter.image_id
   
+  env = [
+    "DS_LICENSE=accept"
+  ]
+  
   networks_advanced {
     name = data.docker_network.cassandra_network.name
   }
