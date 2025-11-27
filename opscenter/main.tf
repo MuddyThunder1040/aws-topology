@@ -16,9 +16,9 @@ data "docker_network" "cassandra_network" {
   name = "cassandra-network"
 }
 
-# DataStax OpsCenter image
+# OpsCenter image (community version)
 resource "docker_image" "opscenter" {
-  name = "datastax/dse-opscenter:latest"
+  name = "thelastpickle/cassandra-opscenter:latest"
 }
 
 # OpsCenter container for monitoring Cassandra cluster
