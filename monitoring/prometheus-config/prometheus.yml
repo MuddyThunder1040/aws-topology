@@ -1,0 +1,26 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'cassandra-monitor'
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # JMX Exporter for Cassandra
+  - job_name: 'cassandra-jmx'
+    static_configs:
+      - targets: ['jmx-exporter:5556']
+        labels:
+          cluster: 'cassandra-cluster'
+
+  # Cassandra nodes (if they expose metrics directly)
+  - job_name: 'cassandra-nodes'
+    static_configs:
+      - targets: 
+          - 'cassandra-node-1:9042'
+        labels:
+          node: 'node-1'
