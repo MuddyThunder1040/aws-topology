@@ -15,7 +15,7 @@ provider "docker" {
 variable "node_count" {
   description = "Number of Cassandra nodes to create"
   type        = number
-  default     = 4
+  default     = 1
   
   validation {
     condition     = var.node_count >= 1 && var.node_count <= 10
