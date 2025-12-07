@@ -37,13 +37,13 @@ resource "docker_image" "cassandra" {
 # Volumes for persistent storage (dynamic based on node_count)
 resource "docker_volume" "cassandra_data" {
   count = var.node_count
-  name  = "cassandra-data${count.index + 1}"
+  name  = "cassandra-data-${count.index + 1}"
 }
 
 # Cassandra Nodes (dynamic based on node_count)
 resource "docker_container" "cassandra_node" {
   count = var.node_count
-  name  = "cassandra-node${count.index + 1}"
+  name  = "cassandra-node-${count.index + 1}"
   image = docker_image.cassandra.image_id
   
   networks_advanced {
@@ -60,7 +60,7 @@ resource "docker_container" "cassandra_node" {
     "CASSANDRA_DC=dc1",
     "CASSANDRA_RACK=rack1",
     "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch",
-    "CASSANDRA_SEEDS=cassandra-node1"
+    "CASSANDRA_SEEDS=cassandra-node-1"
   ]
 
   volumes {
