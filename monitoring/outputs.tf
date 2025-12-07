@@ -1,11 +1,11 @@
 output "prometheus_url" {
-  description = "Prometheus Web UI URL"
-  value       = "http://localhost:9090"
+  description = "Prometheus web UI URL"
+  value       = "http://localhost:9091"
 }
 
 output "grafana_url" {
-  description = "Grafana Web UI URL"
-  value       = "http://localhost:3000"
+  description = "Grafana web UI URL"
+  value       = "http://localhost:3001"
 }
 
 output "grafana_credentials" {
@@ -19,7 +19,7 @@ output "grafana_credentials" {
 
 output "jmx_exporter_url" {
   description = "JMX Exporter metrics endpoint"
-  value       = "http://localhost:5556/metrics"
+  value       = "http://localhost:5557/metrics"
 }
 
 output "setup_instructions" {
@@ -30,19 +30,19 @@ output "setup_instructions" {
     ========================================
     
     🔍 Prometheus (Metrics Collection)
-    URL: http://localhost:9090
+    URL: http://localhost:9091
     
     📈 Grafana (Dashboards)
-    URL: http://localhost:3000
+    URL: http://localhost:3001
     Username: admin
     Password: admin
     
     📊 JMX Exporter (Cassandra Metrics)
-    URL: http://localhost:5556/metrics
+    URL: http://localhost:5557/metrics
     
     ⚙️  Setup Steps:
     
-    1. Open Grafana: http://localhost:3000
+    1. Open Grafana: http://localhost:3001
     2. Login with admin/admin (change password when prompted)
     3. Add Prometheus data source:
        - Go to Configuration > Data Sources
@@ -58,8 +58,8 @@ output "setup_instructions" {
        - Select Prometheus as data source
     
     5. View Metrics:
-       - Prometheus: http://localhost:9090/targets
-       - Grafana: http://localhost:3000/dashboards
+       - Prometheus: http://localhost:9091/targets
+       - Grafana: http://localhost:3001/dashboards
     
     📊 Available Metrics:
     - JVM memory usage

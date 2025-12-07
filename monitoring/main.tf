@@ -58,7 +58,7 @@ resource "docker_container" "prometheus" {
   # Web UI port
   ports {
     internal = 9090
-    external = 9090
+    external = 9091
   }
 
   volumes {
@@ -94,7 +94,7 @@ resource "docker_container" "grafana" {
   # Web UI port
   ports {
     internal = 3000
-    external = 3000
+    external = 3001
   }
 
   env = [
@@ -123,7 +123,7 @@ resource "docker_container" "jmx_exporter" {
   # JMX metrics port
   ports {
     internal = 5556
-    external = 5556
+    external = 5557
   }
 
   env = [
