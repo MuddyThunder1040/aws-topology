@@ -127,7 +127,9 @@ resource "docker_container" "jmx_exporter" {
   }
 
   env = [
-    "SERVICE_PORT=5556"
+    "SERVICE_PORT=5556",
+    "JMX_HOST=cassandra-node-1",
+    "JMX_PORT=7199"
   ]
 
   restart = "unless-stopped"

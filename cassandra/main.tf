@@ -55,12 +55,19 @@ resource "docker_container" "cassandra_node" {
     external = 9042 + count.index
   }
 
+  # JMX port for monitoring
+  ports {
+    internal = 7199
+    external = 7199 + count.index
+  }
+
   env = [
     "CASSANDRA_CLUSTER_NAME=cassandra-cluster",
     "CASSANDRA_DC=dc1",
     "CASSANDRA_RACK=rack1",
     "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch",
-    "CASSANDRA_SEEDS=cassandra-node-1"
+    "CASSANDRA_SEEDS=cassandra-node-1",
+    "LOCAL_JMX=no"
   ]
 
   volumes {
